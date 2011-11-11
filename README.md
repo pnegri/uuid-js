@@ -2,7 +2,7 @@
 
   A js library to generate and parse UUID's, TimeUUID's and generate empty TimeUUID's based on TimeStamp for range selections.
 
-    var UUID = require('uuid-js')
+    var UUID = require('uuid-js');
 
     var aUUID = UUID.new(); // Generate a V4 UUID
 
@@ -10,7 +10,7 @@
     // Prints: 896b677f-fb14-11e0-b14d-d11ca798dbac
 
     var aTimeUUID = UUID.newTS(); // Generate a V1 TimeUUID
-    console.log( aTimeUUID.toString();
+    console.log( aTimeUUID.toString() );
 
     var today = new Date().getTime();
     var last30days = (new Date().setDate( today.getDate() - 30 )).getTime();
@@ -20,7 +20,7 @@
 
     // Example using cassandra
     var query = ...( "select first 50 reversed ?..? from user_twits where key=?", [ rangeStart, rangeEnd, "patricknegri" ]);
-    
+
 
 ## Instalation
 
@@ -34,7 +34,7 @@
 
     UUID.newTS(); // Generate V1 TimeUUID
 
-    UUID.fromTime( time, last ); // Generate a V1 empty TimeUUID from a Date object (Ex: new Date().getTime() ) 
+    UUID.fromTime( time, last ); // Generate a V1 empty TimeUUID from a Date object (Ex: new Date().getTime() )
 
     UUID.firstUUIDForTime( time ); // Same as fromTime but first sequence
 
@@ -57,7 +57,7 @@
     aUUID.toURN(); // same as hex, but with urn:uuid prefix
 
     aUUID.toBytes(); // convert to bytes
-  
+
 ## Contributors
 
   This work was based RFC and by the work of these people.
