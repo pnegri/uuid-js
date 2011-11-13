@@ -3,6 +3,10 @@ var assert = require('assert');
 var sinon = require('sinon');
 var util = require('util');
 
+function isUUID(str) {
+  return str.match(/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/);
+}
+
 exports['Check UUID methods'] = function() {
   var methods = [
     'maxFromBits',
@@ -13,6 +17,8 @@ exports['Check UUID methods'] = function() {
     'limitUI14',
     'limitUI16',
     'limitUI32',
+    'limitUI40',
+    'limitUI48',
     'randomUI04',
     'randomUI06',
     'randomUI08',
@@ -28,13 +34,16 @@ exports['Check UUID methods'] = function() {
     'paddedString',
     'getTimeFieldValues',
     'fromTime',
-    'firstUUIDForTime',
-    'lastUUIDForTime',
+    'firstFromTime',
+    'lastFromTime',
     'fromURN',
     'fromBytes',
     'fromBinary',
+    // Legacy methods:
     'new',
-    'newTS'
+    'newTS',
+    'firstUUIDForTime',
+    'lastUUIDForTime'
   ];
   var found = 0;
   for (var key in UUID) {
@@ -90,7 +99,7 @@ exports['v4 UUID: uuid = UUID.create(4) -> test properties'] = function() {
   assert.equal(found, properties.length);
 
   assert.equal(uuid.version, 4, 'Unexpected version: ' + uuid.version);
-  assert.ok(uuid.hex.match(/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/), 'UUID semantically incorrect');
+  assert.ok(isUUID(uuid.hex), 'UUID semantically incorrect');
 };
 
 
@@ -132,6 +141,7 @@ exports['v4 UUID: uuid.toBytes()'] = function() {
   assert.equal(uuid.hex, parts.join('-'));
 };
 
+
 exports['v4 UUID: check that they are not time-ordered'] = function() {
   var unsorted = [];
   var sorted = [];
@@ -162,13 +172,12 @@ exports['v1 UUID: uuid = UUID.create(1) -> test properties'] = function() {
       found++;
       continue;
     }
-    console.log(key);
     assert.ok(false, 'Found unexpected property in uuid instance: ' + key);
   }
   assert.equal(found, properties.length);
 
   assert.equal(uuid.version, 1, 'Unexpected version: ' + uuid.version);
-  assert.ok(uuid.hex.match(/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/), 'UUID semantically incorrect');
+  assert.ok(isUUID(uuid.hex), 'UUID semantically incorrect');
 };
 
 
@@ -236,6 +245,45 @@ exports['v1 UUID: check that they are time-ordered'] = function() {
 };
 
 
+exports['firstFromTime()'] = function() {
+  var date = new Date();
+  date = date.getTime();
+  var spy = sinon.spy(UUID, 'fromTime');
+
+  var uuid = UUID.firstFromTime(date);
+  assert.ok(spy.calledOnce);
+  assert.ok(spy.calledWith(date, false));
+  assert.ok(isUUID(uuid.toString()), 'UUID semantically incorrect');
+
+  spy.restore();
+};
+
+
+exports['lastFromTime()'] = function() {
+  var date = new Date();
+  date = date.getTime();
+  var spy = sinon.spy(UUID, 'fromTime');
+
+  var uuid = UUID.lastFromTime(date);
+  assert.ok(spy.calledOnce);
+  assert.ok(spy.calledWith(date, true));
+  assert.ok(isUUID(uuid.toString()), 'UUID semantically incorrect');
+
+  spy.restore();
+};
+
+
+exports['fromTime()'] = function() {
+  var date = new Date();
+  date = date.getTime();
+
+  var uuidFirst = UUID.fromTime(date, false);
+  var uuidLast = UUID.fromTime(date, true);
+
+  assert.strictEqual(uuidFirst.toString().substr(0, 19), uuidLast.toString().substr(0, 19), 'Timestamp part of first and last not equal');
+};
+
+
 exports['create(1) -> _create1()'] = function() {
   var spy = sinon.spy(UUID, '_create1');
   var uuid = UUID.create(1);
@@ -279,6 +327,34 @@ exports['newTS() alias for create(1)'] = function() {
 
   assert.ok(spy.calledOnce);
   assert.ok(spy.calledWith(4));
+
+  spy.restore();
+};
+
+
+exports['firstUUIDForTime() alias for firstFromTime()'] = function() {
+  var spy = sinon.spy(UUID, 'firstFromTime');
+
+  var date = new Date();
+  date = date.getTime();
+  var uuid = UUID.firstUUIDForTime(date);
+
+  assert.ok(spy.calledOnce);
+  assert.ok(spy.calledWith(date));
+
+  spy.restore();
+};
+
+
+exports['lastUUIDForTime() alias for lastFromTime()'] = function() {
+  var spy = sinon.spy(UUID, 'lastFromTime');
+
+  var date = new Date();
+  date = date.getTime();
+  var uuid = UUID.lastUUIDForTime(date);
+
+  assert.ok(spy.calledOnce);
+  assert.ok(spy.calledWith(date));
 
   spy.restore();
 };

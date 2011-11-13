@@ -4,7 +4,10 @@
   "version" : "0.7.2",
   "author" : "Patrick Negri <patrick@iugu.com.br>",
   "homepage": "http://github.com/pnegri/uuid-js",
-  "contributors" : ["Gary Dusbabek <gdusbabek@gmail.com>"],
+  "contributors": [
+    "Gary Dusbabek <gdusbabek@gmail.com>"
+    { "name": "Christoph Tavan", "github": "https://github.com/ctavan" }
+  ],
   "main" : "./lib/uuid.js",
   "directories": {
     "lib":"./lib"
