@@ -1,5 +1,6 @@
 var UUID = require('../lib/uuid');
 var assert = require('assert');
+var sinon = require('sinon');
 var util = require('util');
 
 exports['Check UUID methods'] = function() {
@@ -21,16 +22,19 @@ exports['Check UUID methods'] = function() {
     'randomUI32',
     'randomUI40',
     'randomUI48',
+    'create',
+    '_create1',
+    '_create4',
     'paddedString',
-    'new',
     'getTimeFieldValues',
-    'newTS',
     'fromTime',
     'firstUUIDForTime',
     'lastUUIDForTime',
     'fromURN',
     'fromBytes',
-    'fromBinary'
+    'fromBinary',
+    'new',
+    'newTS'
   ];
   var found = 0;
   for (var key in UUID) {
@@ -63,8 +67,8 @@ exports['Check UUID prototypes'] = function() {
 };
 
 
-exports['v4 UUID: uuid = UUID.new() -> test properties'] = function() {
-  var uuid = UUID.new();
+exports['v4 UUID: uuid = UUID.create(4) -> test properties'] = function() {
+  var uuid = UUID.create(4);
 
   var properties = [
     'version',
@@ -91,19 +95,19 @@ exports['v4 UUID: uuid = UUID.new() -> test properties'] = function() {
 
 
 exports['v4 UUID: uuid.toString()'] = function() {
-  var uuid = UUID.new();
+  var uuid = UUID.create(4);
   assert.equal(uuid.toString(), uuid.hex);
 };
 
 
 exports['v4 UUID: uuid.toURN()'] = function() {
-  var uuid = UUID.new();
+  var uuid = UUID.create(4);
   assert.equal(uuid.toURN(), 'urn:uuid:' + uuid.hex);
 };
 
 
 exports['v4 UUID: uuid.toBytes()'] = function() {
-  var uuid = UUID.new();
+  var uuid = UUID.create(4);
   var bytes = uuid.toBytes();
 
   // Reassemble the bytes and check if they fit the string representation
@@ -132,7 +136,7 @@ exports['v4 UUID: check that they are not time-ordered'] = function() {
   var unsorted = [];
   var sorted = [];
   for (var i = 0; i < 100; i++) {
-    var uuid = UUID.new().toString();
+    var uuid = UUID.create(4).toString();
     unsorted.push(uuid);
     sorted.push(uuid);
   }
@@ -141,8 +145,8 @@ exports['v4 UUID: check that they are not time-ordered'] = function() {
 };
 
 
-exports['v1 UUID: uuid = UUID.newTS() -> test properties'] = function() {
-  var uuid = UUID.newTS();
+exports['v1 UUID: uuid = UUID.create(1) -> test properties'] = function() {
+  var uuid = UUID.create(1);
 
   var properties = [
     'version',
@@ -169,19 +173,19 @@ exports['v1 UUID: uuid = UUID.newTS() -> test properties'] = function() {
 
 
 exports['v1 UUID: uuid.toString()'] = function() {
-  var uuid = UUID.newTS();
+  var uuid = UUID.create(1);
   assert.equal(uuid.toString(), uuid.hex);
 };
 
 
 exports['v1 UUID: uuid.toURN()'] = function() {
-  var uuid = UUID.newTS();
+  var uuid = UUID.create(1);
   assert.equal(uuid.toURN(), 'urn:uuid:' + uuid.hex);
 };
 
 
 exports['v1 UUID: uuid.toBytes()'] = function() {
-  var uuid = UUID.newTS();
+  var uuid = UUID.create(1);
   var bytes = uuid.toBytes();
 
   // Reassemble the bytes and check if they fit the string representation
@@ -216,10 +220,10 @@ exports['v1 UUID: check that they are time-ordered'] = function() {
   };
   var i = 0;
   // We have to wait a tiny bit between generating two UUIDs to assure time
-  // order since times are based on milliseconds and two UUIDs generated in
+  // order since times are based on milliseconds and two UUIDs created in
   // the same millisecond need not be different.
   var next = function() {
-    var uuid = UUID.newTS().toString();
+    var uuid = UUID.create(1).toString();
     unsorted.push(uuid);
     sorted.push(uuid);
     i++;
@@ -230,6 +234,55 @@ exports['v1 UUID: check that they are time-ordered'] = function() {
   };
   next();
 };
+
+
+exports['create(1) -> _create1()'] = function() {
+  var spy = sinon.spy(UUID, '_create1');
+  var uuid = UUID.create(1);
+  assert.ok(spy.calledOnce);
+  spy.restore();
+};
+
+
+exports['create(4) -> _create4()'] = function() {
+  var spy = sinon.spy(UUID, '_create4');
+  var uuid = UUID.create(4);
+  assert.ok(spy.calledOnce);
+  spy.restore();
+};
+
+
+exports['create() -> create4()'] = function() {
+  var spy = sinon.spy(UUID, '_create4');
+  var uuid = UUID.create();
+  assert.ok(spy.calledOnce);
+  spy.restore();
+};
+
+
+exports['new() alias for create(4)'] = function() {
+  var spy = sinon.spy(UUID, 'create');
+
+  var uuid = UUID.new();
+
+  assert.ok(spy.calledOnce);
+  assert.ok(spy.calledWith(4));
+
+  spy.restore();
+};
+
+
+exports['newTS() alias for create(1)'] = function() {
+  var spy = sinon.spy(UUID, 'create');
+
+  var uuid = UUID.new();
+
+  assert.ok(spy.calledOnce);
+  assert.ok(spy.calledWith(4));
+
+  spy.restore();
+};
+
 
 for (var key in exports) {
   exports[key]();
