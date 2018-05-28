@@ -190,6 +190,14 @@ exports['v1 UUID: uuid.toURN()'] = function() {
   assert.equal(uuid.toURN(), 'urn:uuid:' + uuid.hex);
 };
 
+exports['v1 UUID: uuid.fromURN()'] = function() {
+  var uuid = UUID.create(1);
+  var uuidToURN = uuid.toURN();
+  var uuidFromURN = UUID.fromURN(uuidToURN);
+
+  assert.equal(uuidFromURN.hex, uuid.hex);
+};
+
 
 exports['v1 UUID: uuid.toBytes()'] = function() {
   var uuid = UUID.create(1);
